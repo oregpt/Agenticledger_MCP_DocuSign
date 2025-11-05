@@ -15,9 +15,11 @@ import docusign from 'docusign-esign';
 export class DocuSignClient {
   private apiClient: docusign.ApiClient;
   private basePath: string;
+  private accessToken: string;
 
   constructor(accessToken: string, basePath: string = 'https://demo.docusign.net/restapi') {
     this.basePath = basePath;
+    this.accessToken = accessToken;
     this.apiClient = new docusign.ApiClient({ basePath: this.basePath });
     this.apiClient.addDefaultHeader('Authorization', `Bearer ${accessToken}`);
   }
@@ -27,7 +29,9 @@ export class DocuSignClient {
    */
   async getUserInfo(): Promise<{ accountId: string; baseUri: string }> {
     try {
-      const userInfo = await this.apiClient.getUserInfo(this.apiClient.getAccessToken()!);
+      // Set OAuth base path for getUserInfo call
+      this.apiClient.setOAuthBasePath('account-d.docusign.com');
+      const userInfo = await this.apiClient.getUserInfo(this.accessToken);
 
       if (!userInfo.accounts || userInfo.accounts.length === 0) {
         throw new Error('No DocuSign accounts found for this user');
@@ -63,8 +67,9 @@ export class DocuSignClient {
    * Update base path (needed after getting user info)
    */
   updateBasePath(basePath: string): void {
-    this.basePath = basePath;
-    this.apiClient.setBasePath(basePath);
+    // Ensure basePath includes /restapi
+    this.basePath = basePath.includes('/restapi') ? basePath : `${basePath}/restapi`;
+    this.apiClient.setBasePath(this.basePath);
   }
 }
 

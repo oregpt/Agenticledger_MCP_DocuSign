@@ -222,9 +222,17 @@ export async function listEnvelopes(params: {
     if (params.options?.status && params.options.status !== 'all') {
       listOptions.status = params.options.status;
     }
+
+    // fromDate is required by DocuSign API
     if (params.options?.fromDate) {
       listOptions.fromDate = params.options.fromDate;
+    } else {
+      // Default to last 30 days if not specified
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      listOptions.fromDate = thirtyDaysAgo.toISOString().split('T')[0];
     }
+
     if (params.options?.toDate) {
       listOptions.toDate = params.options.toDate;
     }

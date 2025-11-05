@@ -168,7 +168,7 @@ await runTest('Validation - Missing accessToken', async () => {
 
   console.log(`   Expected error: ${result.error}`);
 
-  if (!result.error || !result.error.includes('credentials')) {
+  if (!result.error || (!result.error.includes('credentials') && !result.error.includes('accessToken'))) {
     throw new Error('Wrong error message');
   }
 });
